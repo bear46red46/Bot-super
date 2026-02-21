@@ -1,2 +1,0 @@
-# Bot-super
-My bot
