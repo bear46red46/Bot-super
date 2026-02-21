@@ -1,6 +1,6 @@
 import telebot
+from flask import Flask
 import os
-from flask import Flask, request
 
 # =========================
 # SOZLAMALAR
