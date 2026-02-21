@@ -1,12 +1,15 @@
 import telebot
-from flask import Flask
+from flask import Flask, request
 import os
 
 # =========================
 # SOZLAMALAR
 # =========================
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-ADMIN_ID = 7316977124
+ADMIN_ID = "7316977124,6937418004"
+
+if not BOT_TOKEN:
+    raise ValueError("BOT_TOKEN topilmadi! Render Environment Variables ga qo‘shing.")
 
 bot = telebot.TeleBot(BOT_TOKEN)
 app = Flask(__name__)
@@ -50,9 +53,9 @@ def start(message):
     else:
         bot.send_message(
             user_id,
-            "👋 Assalomu alaykum!"
-            "Botimizga hush kelibsiz! 🤖 \n\n"
-            "📩 Adminga murojaatingizni yozib qoldiring.\n"
+            "👋 Assalomu alaykum!\n\n"
+            "🤖 Botimizga hush kelibsiz!\n\n"
+            "📩 Adminga murojaatingizni yozing.\n"
             "Admin tez orada javob beradi."
         )
 
@@ -90,9 +93,9 @@ def admin_reply(message):
         user_id = int(user_id_line.replace("🆔 ID:", "").strip())
 
         bot.send_message(user_id, f"📨 Admin javobi:\n\n{message.text}")
-        bot.send_message(ADMIN_ID, "✅ Javob muvaffaqiyatli yuborildi.")
+        bot.send_message(ADMIN_ID, "✅ Javob yuborildi.")
 
-    except:
+    except Exception as e:
         bot.send_message(ADMIN_ID, "❌ Xatolik! To‘g‘ri murojaatga reply qiling.")
 
 # =========================
@@ -102,7 +105,7 @@ def admin_reply(message):
 def user_count(message):
     if message.from_user.id == ADMIN_ID:
         users = get_users()
-        bot.send_message(ADMIN_ID, f"📊 Botdagi userlar soni: {len(users)}")
+        bot.send_message(ADMIN_ID, f"📊 Userlar soni: {len(users)}")
 
 # =========================
 # REKLAMA
@@ -130,7 +133,7 @@ def send_broadcast(message):
 # =========================
 @app.route('/')
 def home():
-    return "Bot ishlayapti!"
+    return "Bot ishlayapti 🚀"
 
 @app.route(f'/{BOT_TOKEN}', methods=['POST'])
 def webhook():
@@ -144,5 +147,12 @@ def webhook():
 # =========================
 if __name__ == "__main__":
     bot.remove_webhook()
-    bot.set_webhook(url=os.getenv("RENDER_EXTERNAL_URL") + "/" + BOT_TOKEN)
+
+    RENDER_URL = os.getenv("RENDER_EXTERNAL_URL")
+
+    if not RENDER_URL:
+        raise ValueError("RENDER_EXTERNAL_URL topilmadi!")
+
+    bot.set_webhook(url=f"{RENDER_URL}/{BOT_TOKEN}")
+
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
